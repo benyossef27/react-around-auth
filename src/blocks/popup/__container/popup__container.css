@@ -1,0 +1,15 @@
+.popup__container{
+    position: relative;
+    max-width: 816px;
+    background-color: white;
+    border-radius: 10px;
+    font-family: Inter, Verdana, Geneva, Tahoma, sans-serif;
+    padding: 0;
+}
+
+@media screen and (max-width:610px){
+    .popup__container{
+        max-width: 282px;
+    }
+}
+
