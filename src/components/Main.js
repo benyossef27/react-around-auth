@@ -11,7 +11,11 @@ export default function Main(props) {
       <section className="profile">
         <div className="profile__avatar-box" onClick={props.onEditAvatarClick}>
           <img className="profile__avatar" alt="you" src={currentUser.avatar} />
-          <img className="profile__avatar-edit" src={avatar_edit} />
+          <img
+            className="profile__avatar-edit"
+            src={avatar_edit}
+            alt={currentUser.name}
+          />
         </div>
         <div className="profile__details">
           <h1 className="profile__name">{currentUser.name}</h1>
