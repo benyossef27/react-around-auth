@@ -46,7 +46,7 @@
 @import url(./blocks/sign/sign__link.css);
 @import url(./blocks/sign/sign__input.css);
 @import url(./blocks/sign/sign__button.css);
-@import url(./blocks/tooltip/tooltip-message.css);
-@import url(./blocks/tooltip/tooltip.css);
 @import url(./blocks/header/__email/header__email.css);
 @import url(./blocks/header/__link/header__link.css);
+@import url(./blocks/popup/__registration-status/popup__registration-status.css);
+@import url(./blocks/popup/__registration-text/popup____registration-text.css);

@@ -15,7 +15,7 @@ import Login from "./Login";
 import Register from "./Register";
 import ProtectedRoute from "../utils/ProtectedRoute";
 import InfoToolTip from "./InfoToolTip";
-import auth from "../utils/Auth";
+import { authorize, getContent, register } from "../utils/Auth";
 
 export default function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -35,12 +35,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [registered, setRegistered] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const [tooltipMode, setTooltipMode] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const history = useNavigate();
+  const [values, setValues] = useState({
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
 
   function handleEditProfileClick() {
     setEditProfileButton("save");
@@ -61,11 +60,6 @@ export default function App() {
   }
   function handleCardClick(card) {
     setSelectedCard(card);
-  }
-
-  function handleToolTip(success) {
-    setTooltipMode(success);
-    setIsInfoToolTipOpen(true);
   }
 
   function handleUpdateUser({ name, about }) {
@@ -207,91 +201,62 @@ export default function App() {
     }
   }, [loggedIn]);
 
-  function resetForm() {
-    setEmail("");
-    setPassword("");
+  function handleChange(evt) {
+    const { type, value } = evt.target;
+    setValues({ ...values, [type]: value });
   }
 
-  function handleLogin() {
-    setLoggedIn(true);
-  }
-
-  function handleLoginSubmit(e) {
-    e.preventDefault();
-    const [email, password] = [e.target.email.value, e.target.password.value];
-    auth
-      .authorize(email, password)
-      .then((data) => {
-        if (data && data.token) {
-          handleLogin();
-        } else {
-          resetForm();
-          if (!email || !password) {
-            throw new Error(
-              "400 - one or more of the fields were not provided"
-            );
-          }
-          if (!data) {
-            throw new Error(
-              "401 - the user with the specified email not found"
-            );
-          }
-        }
-      })
-      .then(resetForm)
-      .then(() => history.push("/main"))
-      .catch((err) => console.log(err.message));
-  }
-
-  function handleRegisterSubmit(e) {
-    e.preventDefault();
-    auth
-      .register(email, password)
-      .then((res) => {
-        if (!res.data) {
-          handleToolTip("error");
-          throw new Error(`400 - ${res.message ? res.message : res.error}`);
-        }
-      })
-      .then((res) => {
+  function handleRegitrationSubmit(values) {
+    register(values)
+      .then(() => {
+        navigate("./signin");
         setRegistered(true);
-        history.push("/signin");
-        return res;
       })
-      .then((res) => {
-        handleToolTip("success");
-        return res;
-      })
-      .then(resetForm)
       .catch((err) => {
         console.log(err);
+        setRegistered(false);
+      })
+      .finally(() => {
+        setIsInfoToolTipOpen(true);
+      });
+  }
+
+  function handleLogin(values) {
+    authorize({ password: values.password, email: values.email })
+      .then((res) => {
+        console.log(res);
+        checkToken();
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsInfoToolTipOpen(true);
       });
   }
 
   function handleLogout() {
     localStorage.removeItem("token");
     setLoggedIn(false);
-    history.push("/signin");
+    navigate("/signin");
+  }
+
+  function checkToken() {
+    if (localStorage.getItem("token")) {
+      const jwt = localStorage.getItem("jwt");
+      getContent(jwt)
+        .then((res) => {
+          setLoggedIn(true);
+          setValues({
+            email: `${res.data.email}`,
+          });
+          navigate("/");
+        })
+        .catch(console.log);
+    }
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      auth
-        .getContent(token)
-        .then((res) => {
-          setLoggedIn(true);
-          setUserEmail(res.data.email);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      setLoggedIn(false);
-    }
-  }, [loggedIn, userEmail]);
-
+    checkToken();
+  }, []);
   return loading ? (
     <div className="page">
       <div className="root">
@@ -313,124 +278,102 @@ export default function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <Routes>
         <Route
-          path="signin"
+          path="/"
+          element={
+            <ProtectedRoute
+              element={
+                <>
+                  <Header
+                    loggedIn={loggedIn}
+                    userEmail={values}
+                    link={"/signin"}
+                    description={"Log out"}
+                    onLogout={handleLogout}
+                  />
+                  <Main
+                    cards={cards}
+                    onCardLike={handleCardLike}
+                    onEditProfileClick={handleEditProfileClick}
+                    onEditAvatarClick={handleAvatarClick}
+                    onAddPlaceClick={handleAddPlaceClick}
+                    onCardDelete={handleDeleteClick}
+                    onCardClick={handleCardClick}
+                  />
+                  <EditProfilePopup
+                    isOpen={isEditProfilePopupOpen}
+                    onClose={closeAllPopups}
+                    onUpdateUser={handleUpdateUser}
+                    buttonText={editProfileButton}
+                  />
+                  <EditAvatarPopup
+                    isOpen={isAvatarPopupOpen}
+                    onClose={closeAllPopups}
+                    onUpdateAvatar={handleUpdateAvatar}
+                    buttonText={editAvaterButton}
+                  />
+                  <AddPlacePopup
+                    isOpen={isAddPlacePopupOpen}
+                    onClose={closeAllPopups}
+                    onAddPlaceSubmit={handleAddPlaceSubmit}
+                    buttonText={editAddPlaceButton}
+                  />
+                  <DeleteCardPopup
+                    isOpen={isDeletePopupOpen}
+                    onClose={closeAllPopups}
+                    onCardDelete={handleCardDelete}
+                    buttonText={editDeleteCardButton}
+                    card={deleteCard}
+                  />
+                  <ImagePopup
+                    card={selectedCard}
+                    onClose={closeAllPopups}
+                  ></ImagePopup>
+                  <Footer />
+                </>
+              }
+              loggedIn={loggedIn}
+            />
+          }
+        />
+        <Route
+          path="/signin"
           element={
             <>
               <Header
-                userEmail={userEmail}
+                userEmail={values}
                 loggedIn={loggedIn}
                 onLogout={handleLogout}
                 link={"/signup"}
                 description={"Sign up"}
               />
-              <Login
-                loggedIn={loggedIn}
-                email={email}
-                setEmail={setEmail}
-                password={password}
-                setPassword={setPassword}
-                userEmail={setUserEmail}
-                setUserEmail={setUserEmail}
-                handleLogin={handleLogin}
-                handleLoginSubmit={handleLoginSubmit}
-                onLogout={handleLogout}
-                isOpen={isInfoToolTipOpen}
-                handleToolTip={handleToolTip}
-                success={tooltipMode}
-              />
-              <InfoToolTip
-                isOpen={isInfoToolTipOpen}
-                success={tooltipMode}
-                onClose={closeAllPopups}
-                loggedIn={loggedIn}
-              />
+              <Login onLoginClick={handleLogin} onChange={handleChange} />
             </>
           }
         />
         <Route
-          path="singup"
+          path="signup"
           element={
             <>
               <Header
-                userEmail={userEmail}
+                userEmail={values}
                 loggedIn={loggedIn}
                 link={"/signin"}
                 description={"Log in"}
               />
               <Register
-                registered={registered}
-                email={email}
-                setEmail={setEmail}
-                password={password}
-                setPassword={setPassword}
-                handleRegisterSubmit={handleRegisterSubmit}
-                setUserEmail={setUserEmail}
-                handleLogin={handleLogin}
-                handleToolTip={handleToolTip}
-              />
-              <InfoToolTip
-                isOpen={isInfoToolTipOpen}
-                success={tooltipMode}
-                onClose={closeAllPopups}
-                loggedIn={loggedIn}
+                onRegisterClick={handleRegitrationSubmit}
+                onChange={handleChange}
               />
             </>
           }
         />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <Header
-                loggedIn={loggedIn}
-                userEmail={userEmail}
-                link={"/signin"}
-                description={"Log out"}
-                onLogout={handleLogout}
-              />
-              <Main
-                cards={cards}
-                onCardLike={handleCardLike}
-                onEditProfileClick={handleEditProfileClick}
-                onEditAvatarClick={handleAvatarClick}
-                onAddPlaceClick={handleAddPlaceClick}
-                onCardDelete={handleDeleteClick}
-                onCardClick={handleCardClick}
-              />
-              <EditProfilePopup
-                isOpen={isEditProfilePopupOpen}
-                onClose={closeAllPopups}
-                onUpdateUser={handleUpdateUser}
-                buttonText={editProfileButton}
-              />
-              <EditAvatarPopup
-                isOpen={isAvatarPopupOpen}
-                onClose={closeAllPopups}
-                onUpdateAvatar={handleUpdateAvatar}
-                buttonText={editAvaterButton}
-              />
-              <AddPlacePopup
-                isOpen={isAddPlacePopupOpen}
-                onClose={closeAllPopups}
-                onAddPlaceSubmit={handleAddPlaceSubmit}
-                buttonText={editAddPlaceButton}
-              />
-              <DeleteCardPopup
-                isOpen={isDeletePopupOpen}
-                onClose={closeAllPopups}
-                onCardDelete={handleCardDelete}
-                buttonText={editDeleteCardButton}
-                card={deleteCard}
-              />
-              <ImagePopup
-                card={selectedCard}
-                onClose={closeAllPopups}
-              ></ImagePopup>
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
       </Routes>
+      <InfoToolTip
+        name={"registration"}
+        onClose={closeAllPopups}
+        status={registered}
+        isOpen={isInfoToolTipOpen}
+      />
     </CurrentUserContext.Provider>
   );
 }

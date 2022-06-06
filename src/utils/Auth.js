@@ -1,59 +1,59 @@
-class Auth {
-  constructor(options) {
-    this.options = options;
-  }
+const BASE_URL = "https://register.nomoreparties.co";
 
-  register(email, password) {
-    return this.request("/signup", "POST", JSON.stringify({ email, password }));
+const checkRes = (res) => {
+  if (res.ok) {
+    return res.json();
+  } else {
+    return Promise.reject(`Error: ${res.status}`);
   }
+};
 
-  authorize(userid, password) {
-    return this.request(
-      "/signin",
-      "POST",
-      JSON.stringify({ email: userid, password: password })
+export async function register(email, password) {
+  console.log(JSON.stringify(email, password));
+  const response = await fetch(`${BASE_URL}/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(email, password),
+  });
+  if (response.ok) {
+    const data = await response.json();
+    return data;
+  } else {
+    throw new Error(
+      `something get wrong. Status: ${response.status}, ${response.statusText}`
     );
   }
+}
 
-  getContent(token) {
-    return fetch(`${this.options.baseUrl}/users/me`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }).then(async (res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      const body = await res.json();
-      return Promise.reject(body.error || body.message);
-    });
-  }
-
-  request(auth, method, body) {
-    return fetch(`${this.options.baseUrl}${auth}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method,
-      body,
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        if (!data.message) {
-          localStorage.setItem("token", data.token);
-          return data;
-        } else {
-          return;
-        }
-      });
+export async function authorize(email, password) {
+  const response = await fetch(`${BASE_URL}/signin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(email, password),
+  });
+  if (response.ok) {
+    const data = await response.json();
+    localStorage.setItem("jwt", data.token);
+    return data;
+  } else {
+    throw new Error(
+      `something get wrong. Status: ${response.status}, ${response.statusText}`
+    );
   }
 }
-const auth = new Auth({
-  baseUrl: "https://register.nomoreparties.co",
-});
 
-export default auth;
+export function getContent(token) {
+  console.log(token);
+  return fetch(`${BASE_URL}/users/me`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
