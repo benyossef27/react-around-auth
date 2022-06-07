@@ -262,9 +262,7 @@ export default function App() {
   }
 
   useEffect(handleCheckToken, [navigate, token]);
-
   function handleLogout(e) {
-    e.preventDefault();
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setToken(null);
