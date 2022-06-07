@@ -1,13 +1,5 @@
 const BASE_URL = "https://register.nomoreparties.co";
 
-const checkRes = (res) => {
-  if (res.ok) {
-    return res.json();
-  } else {
-    return Promise.reject(`Error: ${res.status}`);
-  }
-};
-
 export async function register(email, password) {
   console.log(JSON.stringify(email, password));
   const response = await fetch(`${BASE_URL}/signup`, {
@@ -22,7 +14,7 @@ export async function register(email, password) {
     return data;
   } else {
     throw new Error(
-      `something get wrong. Status: ${response.status}, ${response.statusText}`
+      `something went wrong. Status: ${response.status}, ${response.statusText}`
     );
   }
 }
@@ -41,19 +33,29 @@ export async function authorize(email, password) {
     return data;
   } else {
     throw new Error(
-      `something get wrong. Status: ${response.status}, ${response.statusText}`
+      `something went wrong. Status: ${response.status}, ${response.statusText}`
     );
   }
 }
 
-export function getContent(token) {
-  console.log(token);
-  return fetch(`${BASE_URL}/users/me`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function getContent(token) {
+  if (token) {
+    try {
+      const res = await fetch(`${BASE_URL}/users/me`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data;
+      }
+      throw new Error("Authorization failed");
+    } catch (err) {
+      console.log(err);
+    }
+  }
 }

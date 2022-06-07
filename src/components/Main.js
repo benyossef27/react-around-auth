@@ -35,7 +35,7 @@ export default function Main(props) {
         ></button>
       </section>
       <section className="cards">
-        {props.cards.map((card) => (
+        {props.cards.slice(0, 30).map((card) => (
           <Card
             key={card._id}
             card={card}

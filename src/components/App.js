@@ -1,8 +1,10 @@
+import { React, useEffect, useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
 import ImagePopup from "./ImagePopup";
-import { React, useEffect, useState } from "react";
 import api from "../utils/api";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import EditProfilePopup from "./EditProfilePopup";
@@ -10,7 +12,6 @@ import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
 import DeleteCardPopup from "./DeleteCardPopup";
 import { SpinnerInfinity } from "spinners-react";
-import { Routes, Route, useNavigate } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
 import ProtectedRoute from "../utils/ProtectedRoute";
@@ -33,7 +34,7 @@ export default function App() {
   const [editDeleteCardButton, setEditDeleteCardButton] = useState("Yes");
   const [deleteCard, setDeleteCard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [values, setValues] = useState({
     email: "",
@@ -181,7 +182,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (loggedIn) {
+    if (isLoggedIn) {
       api.getUserInfo().then((userProfile) => {
         setCurrentUser(userProfile);
       });
@@ -199,7 +200,7 @@ export default function App() {
           console.log(err);
         });
     }
-  }, [loggedIn]);
+  }, [isLoggedIn]);
 
   function handleChange(evt) {
     const { type, value } = evt.target;
@@ -221,11 +222,22 @@ export default function App() {
       });
   }
 
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
   function handleLogin(values) {
-    authorize({ password: values.password, email: values.email })
+    authorize(values)
       .then((res) => {
-        console.log(res);
-        checkToken();
+        if (res) {
+          console.log(res);
+          setValues(res.email);
+          setIsLoggedIn(true);
+          setToken(res.token);
+
+          navigate("/");
+        } else {
+          setIsInfoToolTipOpen(true);
+          throw new Error("No token received from backend");
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -233,30 +245,34 @@ export default function App() {
       });
   }
 
-  function handleLogout() {
-    localStorage.removeItem("token");
-    setLoggedIn(false);
-    navigate("/signin");
-  }
-
-  function checkToken() {
-    if (localStorage.getItem("token")) {
-      const jwt = localStorage.getItem("jwt");
-      getContent(jwt)
+  function handleCheckToken() {
+    if (token) {
+      localStorage.setItem("token", token);
+      getContent(token)
         .then((res) => {
-          setLoggedIn(true);
-          setValues({
-            email: `${res.data.email}`,
-          });
+          console.log(res);
+          setValues(res.data.email);
+          setIsLoggedIn(true);
           navigate("/");
         })
-        .catch(console.log);
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      setIsLoggedIn(false);
     }
   }
 
-  useEffect(() => {
-    checkToken();
-  }, []);
+  useEffect(handleCheckToken, [navigate, token]);
+
+  function handleLogout(e) {
+    e.preventDefault();
+    setIsLoggedIn(false);
+    setToken(null);
+    setValues("");
+    navigate("/signin");
+  }
+
   return loading ? (
     <div className="page">
       <div className="root">
@@ -284,8 +300,8 @@ export default function App() {
               element={
                 <>
                   <Header
-                    loggedIn={loggedIn}
-                    userEmail={values}
+                    isLoggedIn={isLoggedIn}
+                    user={values}
                     link={"/signin"}
                     description={"Log out"}
                     onLogout={handleLogout}
@@ -331,7 +347,7 @@ export default function App() {
                   <Footer />
                 </>
               }
-              loggedIn={loggedIn}
+              isLoggedIn={isLoggedIn}
             />
           }
         />
@@ -340,8 +356,8 @@ export default function App() {
           element={
             <>
               <Header
-                userEmail={values}
-                loggedIn={loggedIn}
+                user={values}
+                isLoggedIn={isLoggedIn}
                 onLogout={handleLogout}
                 link={"/signup"}
                 description={"Sign up"}
@@ -355,8 +371,8 @@ export default function App() {
           element={
             <>
               <Header
-                userEmail={values}
-                loggedIn={loggedIn}
+                user={values}
+                isLoggedIn={isLoggedIn}
                 link={"/signin"}
                 description={"Log in"}
               />

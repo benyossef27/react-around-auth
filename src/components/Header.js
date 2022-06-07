@@ -6,7 +6,7 @@ export default function Header(props) {
   return (
     <header className="header">
       <img className="header__logo" src={logo} alt="Around The U.S." />
-      <p className="header__email">{props.loggedIn ? props.values : ""}</p>
+      <p className="header__email">{props.isLoggedIn ? props.user : ""}</p>
       <Link
         to={`${props.link}`}
         className="header__link"

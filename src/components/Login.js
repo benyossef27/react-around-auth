@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Login({ onLoginClick }) {
-  const [values, setValues] = useState({
-    email: "",
-    password: "",
-  });
+  const [values, setValues] = useState({ email: "", password: "" });
+
   function handleChange(evt) {
     const { type, value } = evt.target;
     setValues({ ...values, [type]: value });
