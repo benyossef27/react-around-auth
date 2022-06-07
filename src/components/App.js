@@ -228,7 +228,6 @@ export default function App() {
     authorize(values)
       .then((res) => {
         if (res) {
-          console.log(res);
           setValues(res.email);
           setIsLoggedIn(true);
           setToken(res.token);
@@ -250,7 +249,6 @@ export default function App() {
       localStorage.setItem("token", token);
       getContent(token)
         .then((res) => {
-          console.log(res);
           setValues(res.data.email);
           setIsLoggedIn(true);
           navigate("/");
@@ -267,6 +265,7 @@ export default function App() {
 
   function handleLogout(e) {
     e.preventDefault();
+    localStorage.removeItem("token");
     setIsLoggedIn(false);
     setToken(null);
     setValues("");
