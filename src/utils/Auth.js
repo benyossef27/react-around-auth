@@ -1,5 +1,14 @@
 const BASE_URL = "https://register.nomoreparties.co";
 
+function checkResponse(response) {
+  if (response === 200) {
+    const data = response.json();
+    return data;
+  } else {
+    throw new Error(`something went wrong. Status: ${response}`);
+  }
+}
+
 export async function register(email, password) {
   console.log(JSON.stringify(email, password));
   const response = await fetch(`${BASE_URL}/signup`, {
@@ -9,14 +18,7 @@ export async function register(email, password) {
     },
     body: JSON.stringify(email, password),
   });
-  if (response.ok) {
-    const data = await response.json();
-    return data;
-  } else {
-    throw new Error(
-      `something went wrong. Status: ${response.status}, ${response.statusText}`
-    );
-  }
+  checkResponse();
 }
 
 export async function authorize(email, password) {
@@ -40,22 +42,14 @@ export async function authorize(email, password) {
 
 export async function getContent(token) {
   if (token) {
-    try {
-      const res = await fetch(`${BASE_URL}/users/me`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data;
-      }
-      throw new Error("Authorization failed");
-    } catch (err) {
-      console.log(err);
-    }
+    const res = await fetch(`${BASE_URL}/users/me`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    checkResponse();
   }
 }

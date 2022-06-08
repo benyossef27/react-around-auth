@@ -3,18 +3,18 @@ import { useState } from "react";
 import PopupWithForm from "./PopupWithForm";
 
 export default function EditAvatarPopup(props) {
-  const [inputs, setInputs] = useState("");
+  const [inputs, setInputs] = useState({});
   const [validation, setValidation] = useState({});
   const [isValid, setIsValid] = useState(false);
 
   React.useEffect(() => {
-    setInputs("");
+    setInputs({});
     if (!props.isOpen) setValidation({});
   }, [props.isOpen]);
 
-  function handleinputs(event) {
+  function handleInputs(event) {
     setInputs({
-      inputs,
+      ...inputs,
       [event.target.name]: event.target.value,
     });
     setValidation({
@@ -31,11 +31,10 @@ export default function EditAvatarPopup(props) {
     }
   }, [validation, inputs, props.isOpen]);
 
-  const avatarRef = React.useRef("");
   function handleSubmit(e) {
     e.preventDefault();
     props.onUpdateAvatar({
-      avatar: avatarRef.current.value,
+      avatar: inputs.link,
     });
   }
 
@@ -58,9 +57,8 @@ export default function EditAvatarPopup(props) {
           isValid ? "" : "popup__input_type_error"
         }`}
         required
-        ref={avatarRef}
         value={inputs.link || ""}
-        onChange={handleinputs}
+        onChange={handleInputs}
       />
       <span
         id="avatar-img-input-error"
