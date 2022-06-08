@@ -5,7 +5,9 @@ export async function checkRes(res) {
     const data = await res.json();
     return data;
   } else {
-    throw new Error("Authorization failed");
+    throw new Error(
+      `something went wrong. Status: ${res.status}, ${res.statusText}`
+    );
   }
 }
 
@@ -18,6 +20,7 @@ export async function register(email, password) {
     },
     body: JSON.stringify(email, password),
   }).then((res) => checkRes(res));
+  return response;
 }
 
 export async function authorize(email, password) {
@@ -41,7 +44,7 @@ export async function authorize(email, password) {
 
 export async function getContent(token) {
   if (token) {
-    const res = await fetch(`${BASE_URL}/users/me`, {
+    const response = await fetch(`${BASE_URL}/users/me`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -49,5 +52,6 @@ export async function getContent(token) {
         Authorization: `Bearer ${token}`,
       },
     }).then((res) => checkRes(res));
+    return response;
   }
 }

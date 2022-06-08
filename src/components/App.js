@@ -210,7 +210,6 @@ export default function App() {
           setValues(res.email);
           setIsLoggedIn(true);
           setToken(res.token);
-
           navigate("/");
         } else {
           setIsInfoToolTipOpen(true);
