@@ -10,8 +10,12 @@ export default function AddPlacePopup(props) {
   function handleSubmit(evt) {
     evt.preventDefault();
     props.onAddPlaceSubmit({ name: inputs.name, link: inputs.link });
-    resetForm();
   }
+
+  React.useEffect(() => {
+    resetForm();
+  }, [props.isOpen]);
+
   return (
     <PopupWithForm
       name="place"

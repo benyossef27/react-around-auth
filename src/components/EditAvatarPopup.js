@@ -11,8 +11,11 @@ export default function EditAvatarPopup(props) {
     props.onUpdateAvatar({
       avatar: inputs.link,
     });
-    resetForm();
   }
+
+  React.useEffect(() => {
+    resetForm({});
+  }, [props.isOpen]);
 
   return (
     <PopupWithForm

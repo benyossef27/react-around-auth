@@ -42,7 +42,7 @@ export default function Login({ onLoginClick }) {
           onChange={handleChange}
           autoComplete={"current-password"}
         />
-        <button className="sign__button" type="submit" onClick={handleSubmit}>
+        <button className="sign__button" type="submit">
           Log in
         </button>
       </form>

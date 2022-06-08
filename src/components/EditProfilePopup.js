@@ -14,7 +14,6 @@ export default function EditProfilePopup(props) {
       name: inputs.name,
       about: inputs.about,
     });
-    resetForm();
   }
 
   return (

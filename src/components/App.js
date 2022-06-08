@@ -69,7 +69,7 @@ export default function App() {
       .setUserInfo({ name, about })
       .then((info) => {
         setCurrentUser(info);
-        handlePopupClose();
+        closeAllPopups();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
@@ -81,7 +81,7 @@ export default function App() {
       .setUserAvatar(avatar)
       .then((info) => {
         setCurrentUser(info);
-        handlePopupClose();
+        closeAllPopups();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
@@ -93,13 +93,13 @@ export default function App() {
       .createCard(info)
       .then((newCard) => {
         setCards([newCard, ...cards]);
-        handlePopupClose();
+        closeAllPopups();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
       });
   }
-  function handlePopupClose() {
+  function closeAllPopups() {
     setIsEditProfilePopupOpen(false);
     setIsAvatarPopupOpen(false);
     setIsAddPlacePopupOpen(false);
@@ -115,17 +115,17 @@ export default function App() {
       .catch((err) => {
         console.log(`Error: ${err}`);
       });
-    const closeByOverLay = (evt) => {
+    const handlePopupClose = (evt) => {
       if (
         evt.target.classList.contains("popup_opened") ||
         evt.target.classList.contains("popup__close")
       ) {
-        handlePopupClose();
+        closeAllPopups();
       }
     };
 
-    document.addEventListener("click", closeByOverLay);
-    return () => document.removeEventListener("click", closeByOverLay);
+    document.addEventListener("click", handlePopupClose);
+    return () => document.removeEventListener("click", handlePopupClose);
   }, []);
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export default function App() {
 
     const closeByEscape = (e) => {
       if (e.key === "Escape") {
-        handlePopupClose();
+        closeAllPopups();
       }
     };
 
@@ -174,7 +174,7 @@ export default function App() {
       .deleteCard(card._id)
       .then(() => {
         setCards(cards.filter((deleted) => deleted._id !== card._id));
-        handlePopupClose();
+        closeAllPopups();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
@@ -292,32 +292,32 @@ export default function App() {
                   />
                   <EditProfilePopup
                     isOpen={isEditProfilePopupOpen}
-                    onClose={handlePopupClose}
+                    onClose={closeAllPopups}
                     onUpdateUser={handleUpdateUser}
                     buttonText={editProfileButton}
                   />
                   <EditAvatarPopup
                     isOpen={isAvatarPopupOpen}
-                    onClose={handlePopupClose}
+                    onClose={closeAllPopups}
                     onUpdateAvatar={handleUpdateAvatar}
                     buttonText={editAvaterButton}
                   />
                   <AddPlacePopup
                     isOpen={isAddPlacePopupOpen}
-                    onClose={handlePopupClose}
+                    onClose={closeAllPopups}
                     onAddPlaceSubmit={handleAddPlaceSubmit}
                     buttonText={editAddPlaceButton}
                   />
                   <DeleteCardPopup
                     isOpen={isDeletePopupOpen}
-                    onClose={handlePopupClose}
+                    onClose={closeAllPopups}
                     onCardDelete={handleCardDelete}
                     buttonText={editDeleteCardButton}
                     card={deleteCard}
                   />
                   <ImagePopup
                     card={selectedCard}
-                    onClose={handlePopupClose}
+                    onClose={closeAllPopups}
                   ></ImagePopup>
                   <Footer />
                 </>
@@ -361,7 +361,7 @@ export default function App() {
       </Routes>
       <InfoToolTip
         name={"registration"}
-        onClose={handlePopupClose}
+        onClose={closeAllPopups}
         status={registered}
         isOpen={isInfoToolTipOpen}
       />
