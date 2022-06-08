@@ -69,7 +69,7 @@ export default function App() {
       .setUserInfo({ name, about })
       .then((info) => {
         setCurrentUser(info);
-        closeAllPopups();
+        handlePopupClose();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
@@ -81,7 +81,7 @@ export default function App() {
       .setUserAvatar(avatar)
       .then((info) => {
         setCurrentUser(info);
-        closeAllPopups();
+        handlePopupClose();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
@@ -93,13 +93,13 @@ export default function App() {
       .createCard(info)
       .then((newCard) => {
         setCards([newCard, ...cards]);
-        closeAllPopups();
+        handlePopupClose();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
       });
   }
-  function closeAllPopups() {
+  function handlePopupClose() {
     setIsEditProfilePopupOpen(false);
     setIsAvatarPopupOpen(false);
     setIsAddPlacePopupOpen(false);
@@ -120,7 +120,7 @@ export default function App() {
         evt.target.classList.contains("popup_opened") ||
         evt.target.classList.contains("popup__close")
       ) {
-        closeAllPopups();
+        handlePopupClose();
       }
     };
 
@@ -145,7 +145,7 @@ export default function App() {
 
     const closeByEscape = (e) => {
       if (e.key === "Escape") {
-        closeAllPopups();
+        handlePopupClose();
       }
     };
 
@@ -174,33 +174,12 @@ export default function App() {
       .deleteCard(card._id)
       .then(() => {
         setCards(cards.filter((deleted) => deleted._id !== card._id));
-        closeAllPopups();
+        handlePopupClose();
       })
       .catch((err) => {
         console.log(`Error: ${err}`);
       });
   }
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      api.getUserInfo().then((userProfile) => {
-        setCurrentUser(userProfile);
-      });
-      api
-        .getInitialCards()
-        .then((data) => {
-          if (data) {
-            setCards((cards) => [...cards, ...data]);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  }, [isLoggedIn]);
 
   function handleChange(evt) {
     const { type, value } = evt.target;
@@ -314,32 +293,32 @@ export default function App() {
                   />
                   <EditProfilePopup
                     isOpen={isEditProfilePopupOpen}
-                    onClose={closeAllPopups}
+                    onClose={handlePopupClose}
                     onUpdateUser={handleUpdateUser}
                     buttonText={editProfileButton}
                   />
                   <EditAvatarPopup
                     isOpen={isAvatarPopupOpen}
-                    onClose={closeAllPopups}
+                    onClose={handlePopupClose}
                     onUpdateAvatar={handleUpdateAvatar}
                     buttonText={editAvaterButton}
                   />
                   <AddPlacePopup
                     isOpen={isAddPlacePopupOpen}
-                    onClose={closeAllPopups}
+                    onClose={handlePopupClose}
                     onAddPlaceSubmit={handleAddPlaceSubmit}
                     buttonText={editAddPlaceButton}
                   />
                   <DeleteCardPopup
                     isOpen={isDeletePopupOpen}
-                    onClose={closeAllPopups}
+                    onClose={handlePopupClose}
                     onCardDelete={handleCardDelete}
                     buttonText={editDeleteCardButton}
                     card={deleteCard}
                   />
                   <ImagePopup
                     card={selectedCard}
-                    onClose={closeAllPopups}
+                    onClose={handlePopupClose}
                   ></ImagePopup>
                   <Footer />
                 </>
@@ -383,7 +362,7 @@ export default function App() {
       </Routes>
       <InfoToolTip
         name={"registration"}
-        onClose={closeAllPopups}
+        onClose={handlePopupClose}
         status={registered}
         isOpen={isInfoToolTipOpen}
       />

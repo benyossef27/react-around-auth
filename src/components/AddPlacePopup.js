@@ -1,41 +1,16 @@
 import React from "react";
-import { useState } from "react";
+
 import PopupWithForm from "./PopupWithForm";
+import { useFormAndValidation } from "../utils/useFormAndValidation";
 
 export default function AddPlacePopup(props) {
-  const [inputs, setInputs] = useState({});
-  const [validation, setValidation] = useState({});
-  const [isValid, setIsValid] = useState(false);
-
-  React.useEffect(() => {
-    setInputs("");
-    if (!props.isOpen) setValidation({});
-  }, [props.isOpen]);
-
-  function handleinputs(event) {
-    setInputs({
-      ...inputs,
-      [event.target.name]: event.target.value,
-    });
-    setValidation({
-      ...validation,
-      [event.target.name]: event.target.validationMessage,
-    });
-  }
-
-  React.useEffect(() => {
-    if (props.isOpen) {
-      const formIsValid =
-        inputs.name &&
-        inputs.link &&
-        !Object.values(validation).every((val) => Boolean(val));
-      setIsValid(formIsValid || false);
-    }
-  }, [validation, inputs, props.isOpen]);
+  const { inputs, handleChange, errors, isValid, resetForm } =
+    useFormAndValidation();
 
   function handleSubmit(evt) {
     evt.preventDefault();
     props.onAddPlaceSubmit({ name: inputs.name, link: inputs.link });
+    resetForm();
   }
   return (
     <PopupWithForm
@@ -59,13 +34,13 @@ export default function AddPlacePopup(props) {
         maxLength="30"
         required
         value={inputs.name || ""}
-        onChange={handleinputs}
+        onChange={handleChange}
       />
       <span
         id="place-title-input-error"
         className={`${isValid ? "" : "popup__error_visible"}`}
       >
-        {validation.name}
+        {errors.name}
       </span>
       <input
         id="place-img-input"
@@ -77,13 +52,13 @@ export default function AddPlacePopup(props) {
         }`}
         required
         value={inputs.link || ""}
-        onChange={handleinputs}
+        onChange={handleChange}
       />
       <span
         id="place-img-input-error"
         className={`${isValid ? "" : "popup__error_visible"}`}
       >
-        {validation.link}
+        {errors.link}
       </span>
     </PopupWithForm>
   );

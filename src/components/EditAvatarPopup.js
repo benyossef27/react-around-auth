@@ -1,41 +1,17 @@
 import React from "react";
-import { useState } from "react";
+import { useFormAndValidation } from "../utils/useFormAndValidation";
 import PopupWithForm from "./PopupWithForm";
 
 export default function EditAvatarPopup(props) {
-  const [inputs, setInputs] = useState({});
-  const [validation, setValidation] = useState({});
-  const [isValid, setIsValid] = useState(false);
-
-  React.useEffect(() => {
-    setInputs({});
-    if (!props.isOpen) setValidation({});
-  }, [props.isOpen]);
-
-  function handleInputs(event) {
-    setInputs({
-      ...inputs,
-      [event.target.name]: event.target.value,
-    });
-    setValidation({
-      ...validation,
-      [event.target.name]: event.target.validationMessage,
-    });
-  }
-
-  React.useEffect(() => {
-    if (props.isOpen) {
-      const formIsValid =
-        inputs && !Object.values(validation).every((val) => Boolean(val));
-      setIsValid(formIsValid || false);
-    }
-  }, [validation, inputs, props.isOpen]);
+  const { inputs, handleChange, errors, isValid, setInputs, resetForm } =
+    useFormAndValidation();
 
   function handleSubmit(e) {
     e.preventDefault();
     props.onUpdateAvatar({
       avatar: inputs.link,
     });
+    resetForm();
   }
 
   return (
@@ -58,13 +34,13 @@ export default function EditAvatarPopup(props) {
         }`}
         required
         value={inputs.link || ""}
-        onChange={handleInputs}
+        onChange={handleChange}
       />
       <span
         id="avatar-img-input-error"
         className={`${isValid ? "" : "popup__error_visible"}`}
       >
-        {validation.link}
+        {errors.link}
       </span>
     </PopupWithForm>
   );

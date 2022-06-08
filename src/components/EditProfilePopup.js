@@ -1,43 +1,12 @@
-import { useState } from "react";
 import React from "react";
 import PopupWithForm from "./PopupWithForm";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { useFormAndValidation } from "../utils/useFormAndValidation";
 
 export default function EditProfilePopup(props) {
   const currentUser = React.useContext(CurrentUserContext);
-  const [inputs, setInputs] = useState({});
-  const [validation, setValidation] = useState({});
-  const [isValid, setIsValid] = useState(false);
-
-  React.useEffect(() => {
-    setInputs("");
-    if (!props.isOpen) setValidation({});
-  }, [props.isOpen]);
-
-  function handleinputs(event) {
-    setInputs({
-      ...inputs,
-      [event.target.name]: event.target.value,
-    });
-    setValidation({
-      ...validation,
-      [event.target.name]: event.target.validationMessage,
-    });
-  }
-
-  React.useEffect(() => {
-    if (props.isOpen) {
-      const formIsValid =
-        inputs.name &&
-        inputs.about &&
-        !Object.values(validation).every((val) => Boolean(val));
-      setIsValid(formIsValid || false);
-    }
-  }, [validation, inputs, props.isOpen]);
-
-  React.useEffect(() => {
-    setInputs(currentUser);
-  }, [currentUser, props.isOpen]);
+  const { inputs, handleChange, errors, isValid, setInputs, resetForm } =
+    useFormAndValidation();
 
   function handleSubmit(evt) {
     evt.preventDefault();
@@ -45,6 +14,7 @@ export default function EditProfilePopup(props) {
       name: inputs.name,
       about: inputs.about,
     });
+    resetForm();
   }
 
   return (
@@ -67,13 +37,13 @@ export default function EditProfilePopup(props) {
         maxLength="40"
         required
         value={inputs.name || ""}
-        onChange={handleinputs}
+        onChange={handleChange}
       />
       <span
         id="name-input-error"
         className={`${isValid ? "" : "popup__error_visible"}`}
       >
-        {validation.name}
+        {errors.name}
       </span>
       <input
         id="job-input"
@@ -85,13 +55,13 @@ export default function EditProfilePopup(props) {
         maxLength="200"
         required
         value={inputs.about || ""}
-        onChange={handleinputs}
+        onChange={handleChange}
       />
       <span
         id="job-input-error"
         className={`${isValid ? "" : "popup__error_visible"}`}
       >
-        {validation.about}
+        {errors.about}
       </span>
     </PopupWithForm>
   );
