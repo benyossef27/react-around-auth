@@ -1,11 +1,11 @@
 const BASE_URL = "https://register.nomoreparties.co";
 
-function checkResponse(response) {
-  if (response === 200) {
-    const data = response.json();
+export async function checkRes(res) {
+  if (res.ok) {
+    const data = await res.json();
     return data;
   } else {
-    throw new Error(`something went wrong. Status: ${response}`);
+    throw new Error("Authorization failed");
   }
 }
 
@@ -17,8 +17,7 @@ export async function register(email, password) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(email, password),
-  });
-  checkResponse();
+  }).then((res) => checkRes(res));
 }
 
 export async function authorize(email, password) {
@@ -49,7 +48,6 @@ export async function getContent(token) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
-    checkResponse();
+    }).then((res) => checkRes(res));
   }
 }

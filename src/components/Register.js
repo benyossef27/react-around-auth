@@ -31,6 +31,7 @@ export default function Register({ onRegisterClick }) {
           required
           value={values.email}
           onChange={handleChange}
+          autoComplete={"current-email"}
         />
         <input
           className="sign__input"
@@ -39,8 +40,9 @@ export default function Register({ onRegisterClick }) {
           required
           value={values.password}
           onChange={handleChange}
+          autoComplete={"current-password"}
         />
-        <button type="submit" className="sign__button" onSubmit={handleSubmit}>
+        <button type="submit" className="sign__button">
           Sign up
         </button>
       </form>

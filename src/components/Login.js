@@ -31,6 +31,7 @@ export default function Login({ onLoginClick }) {
           required
           value={values.email}
           onChange={handleChange}
+          autoComplete={"current-email"}
         />
         <input
           className="sign__input"
@@ -39,6 +40,7 @@ export default function Login({ onLoginClick }) {
           required
           value={values.password}
           onChange={handleChange}
+          autoComplete={"current-password"}
         />
         <button className="sign__button" type="submit" onClick={handleSubmit}>
           Log in
