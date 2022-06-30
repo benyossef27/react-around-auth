@@ -14,7 +14,6 @@ export default function Login({ onLoginClick }) {
     onLoginClick(values);
   }
 
-  const navigate = useNavigate();
   return (
     <div className="sign">
       <h2 className="sign__title">Log in</h2>
